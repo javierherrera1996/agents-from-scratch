@@ -10,7 +10,13 @@ from langchain_core.documents import Document
 from typing_extensions import List, TypedDict
 from langgraph.graph import START, StateGraph
 
+from typing import Any, Dict, Optional
 
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
+
+
+# ---------------------------
 embeddings = OpenAIEmbeddings()
 vector_store = InMemoryVectorStore(embeddings)
 
@@ -68,3 +74,4 @@ def generate(state: State):
 graph_builder = StateGraph(State).add_sequence([retrieve, generate])
 graph_builder.add_edge(START, "retrieve")
 rag_agent = graph_builder.compile()
+
