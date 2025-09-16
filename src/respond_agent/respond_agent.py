@@ -14,20 +14,6 @@ from langgraph.prebuilt import create_react_agent
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import interrupt
 
-from policy_mcp_client import build_tools_from_mcp_url
-
-# Filtra solo las tools que vas a permitir al agente (por nombre MCP real)
-TOOLS = build_tools_from_mcp_url(only=[
-    "verify_policy_info",
-    "mcp_create_policy",
-    "mcp_update_policy",
-    "mcp_delete_policy",
-    "approve_policy",
-    "unlock_policy",
-    "request_missing_info",
-    "get_policy",
-    "list_policies",
-])
 
 # ============== Config ============
 LLM_MODEL = os.getenv("LLM_MODEL", "openai:gpt-4.1")
@@ -42,9 +28,11 @@ class PolicyState(TypedDict, total=False):
     hitl_resolved: bool       # bandera tras aprobación humana
     logs: List[str]           # trazas
 
+
 def _log(s: PolicyState, msg: str):
     s.setdefault("logs", []).append(msg)
     return s
+
 
 # Escalares permitidos (tienen 'type' en el schema)
 JsonScalar = Union[str, int, float, bool, None]
@@ -65,6 +53,7 @@ class PolicyIntent(BaseModel):
 
 base_llm = init_chat_model(LLM_MODEL, temperature=0.0)
 extract_llm = base_llm.with_structured_output(PolicyIntent)
+
 
 def extract_intent_node(state: PolicyState) -> PolicyState:
     email_text = state["email_input"]
@@ -155,6 +144,8 @@ TOOLS = [
     mcp_update_policy,
     mcp_delete_policy,
 ]
+
+
 
 # ============== Agente prebuild (React Agent) ==============
 AGENT_SYSTEM_PROMPT = """\
